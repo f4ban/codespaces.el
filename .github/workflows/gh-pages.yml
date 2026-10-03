@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "README.org"
+      - "README.md"
 
   workflow_dispatch:
 
@@ -24,10 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4    
-      - name: Install pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
-      - name: Convert Org to Markdown
-        run: pandoc README.org -f org -t gfm -o index.md
+      - name: Copy README to index
+        run: cp README.md index.md
       - name: Create Jekyll config
         run: |
           cat <<EOF > _config.yml

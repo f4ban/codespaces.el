@@ -4,7 +4,7 @@
 
 ;; Author: Fabian Markl <fabian@markl.dev>
 ;; URL: https://github.com/F4ban/codespaces.el
-;; Version: 0.2
+;; Version: 0.3
 ;; Package-Requires: ((emacs "28.1"))
 ;; Keywords: comm
 ;; Created: 2022-08-11
