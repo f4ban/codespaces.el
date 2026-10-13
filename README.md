@@ -62,7 +62,7 @@ And to disable TRAMP's default ControlMaster settings in your Emacs config, add:
 
 # User-facing commands
 
--   `codespaces-connect` brings up a list of codespaces, and upon selection opens a Dired buffer in `/workspaces` (the default Codespaces location).
+-   `codespaces-connect` brings up a list of codespaces, and upon selection opens a Dired buffer in `/workspaces` (the default Codespaces location). Candidates are sorted by most-recently-used.
 -   `codespaces-start` brings up a list of inactive codespaces and upon selection spawns a task that starts the selected codespace.
 -   `codespaces-stop` does the same but for stopping active codespaces.
 -   `codespaces-create` prompts for a repository, branch, and machine to then create a Codespace. Default branch is fetched via gh.
@@ -71,7 +71,6 @@ And to disable TRAMP's default ControlMaster settings in your Emacs config, add:
 
 # Missing features
 
--   Completion should sort codespaces by most-recently-used.
 -   Should have a nice `transient.el` UI.
 
 

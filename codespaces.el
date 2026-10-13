@@ -106,7 +106,8 @@ allowing for faster startup.  Validation happens lazily on first use."
   (display-name nil :type string)
   (state 'unknown :type symbol)
   (repository nil :type string)
-  (ref nil :type string))
+  (ref nil :type string)
+  (last-used-at "" :type string))
 
 (defun codespaces-space-from-hashtable (ht)
   "Create a codespace from the JSON hashtable HT returned from `gh'."
@@ -117,7 +118,8 @@ allowing for faster startup.  Validation happens lazily on first use."
      :display-name (get "displayName")
      :state (intern (downcase (get "state")))
      :repository (get "repository")
-     :ref (gethash "ref" (get "gitStatus")))))
+     :ref (gethash "ref" (get "gitStatus"))
+     :last-used-at (or (get "lastUsedAt") ""))))
 
 (defun codespaces-space-readable-name (cs)
   "Return the display name of CS, or, if that is empty, its machine name."
@@ -215,13 +217,32 @@ allowing for faster startup.  Validation happens lazily on first use."
 
 (defun codespaces--annotate (s)
   "Annotation function for S invoked by `completing-read'."
-  (let ((item (gethash s minibuffer-completion-table)))
-    (codespaces-space-describe item)))
+  (let ((item (cdr (assoc s minibuffer-completion-table))))
+    (when item
+      (codespaces-space-describe item))))
+
+(defun codespaces--sorted (ht)
+  "Return the codespaces in HT as a list, most recently used first.
+
+Codespaces are sorted by their `last-used-at' timestamp, which `gh'
+returns as an RFC 3339 string and is therefore comparable with `string>'."
+  (cl-loop for v being the hash-values of ht
+           collect v into spaces
+           finally return
+           (sort spaces (lambda (a b)
+                          (string> (codespaces-space-last-used-at a)
+                                   (codespaces-space-last-used-at b))))))
 
 (defun codespaces--complete (ht)
-  "Invoke `completing-read' over JSON hashtable HT, returning a codespace."
-  (let ((completion-extra-properties '(:annotation-function codespaces--annotate)))
-    (gethash (completing-read "Select a codespace: " ht nil t) ht)))
+  "Invoke `completing-read' over hashtable HT, returning a codespace.
+
+Candidates are presented most recently used first."
+  (let* ((collection (mapcar (lambda (cs)
+                               (cons (codespaces-space-readable-name cs) cs))
+                             (codespaces--sorted ht)))
+         (completion-extra-properties '(:annotation-function codespaces--annotate)))
+    (cdr (assoc (completing-read "Select a codespace: " collection nil t)
+                collection))))
 
 (defun codespaces-tramp-completion (_filename)
   "Provide a set of completion candidates to TRAMP connections."
